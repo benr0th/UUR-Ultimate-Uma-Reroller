@@ -1,6 +1,6 @@
 ﻿; This script was created using Pulover's Macro Creator
 ; www.macrocreator.com
-
+#Requires AutoHotkey v1.1+
 #NoEnv
 SetWorkingDir %A_ScriptDir%
 CoordMode, Mouse, Window
@@ -120,7 +120,7 @@ Loop
         If (ErrorLevel = 0)
         {
             Send, {F12}  ; Take screenshot
-            Sleep, 500
+            Sleep, 1500
             click1 := scaleX(740)
             click2 := scaleY(939)
             Click, %click1%, %click2% Left, 1  ; Close out of Data Link
