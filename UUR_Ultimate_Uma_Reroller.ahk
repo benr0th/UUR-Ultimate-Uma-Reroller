@@ -99,7 +99,7 @@ Loop
     }
     If (preDataLink = 1 and preLinkDone = 0 and onTitleScreen = 1)
     {
-        MsgBox, 0, , Title screen detected. Please sign in first to Link Data of current account before rerolling. Script terminating.
+        MsgBox, 0, , Title screen detected. Please sign in first to Link Data current account before rerolling. Script terminating.
         ExitApp
     }
     If (preDataLink = 1 and preLinkDone = 0 and onTitleScreen = 0)
@@ -280,6 +280,7 @@ Loop
     IfWinNotActive, Umamusume ahk_class UnityWndClass
     {
         Send, {Control Down}{w}{Control Up}
+        Sleep, 100
         WinActivate, Umamusume ahk_class UnityWndClass
         Sleep, 333
     }
@@ -306,6 +307,7 @@ Loop
     IfWinNotActive, Umamusume ahk_class UnityWndClass
     {
         Send, {Control Down}{w}{Control Up}
+        Sleep, 100
         WinActivate, Umamusume ahk_class UnityWndClass
         Sleep, 333
     }
@@ -323,14 +325,14 @@ Loop
         Click, %click1%, %click2% Left, 1  ; Check it's been clicked and click it again
         Sleep, 10
     }
-    x1 := scaleX(907)
-    y1 := scaleY(535)
-    x2 := scaleX(1671)
-    y2 := scaleY(885)
+    x1 := scaleX(1435)
+    y1 := scaleY(699)
+    x2 := scaleX(1644)
+    y2 := scaleY(804)
     Loop
     {
         CoordMode, Pixel, Screen
-        ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250717211019.png
+        ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250719002316.png
         Sleep, 100
     }
     Until ErrorLevel = 0
