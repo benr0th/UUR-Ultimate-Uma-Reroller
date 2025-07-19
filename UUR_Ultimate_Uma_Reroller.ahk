@@ -119,6 +119,7 @@ Loop
         Until ErrorLevel = 0
         If (ErrorLevel = 0)
         {
+            Send, {F12}  ; Take screenshot
             Sleep, 500
             click1 := scaleX(740)
             click2 := scaleY(939)
@@ -910,7 +911,7 @@ Loop
     Until ErrorLevel = 0
     If (ErrorLevel = 0)
     {
-        Send, {Control Down}{F12}{Control Up}  ; Take screenshot
+        Send, {F12}  ; Take screenshot
     }
     /*
     x1 := scaleX(235)
@@ -966,7 +967,7 @@ Loop
     Until ErrorLevel = 0
     If (ErrorLevel = 0)
     {
-        Send, {Control Down}{F12}{Control Up}  ; Take screenshot
+        Send, {F12}  ; Take screenshot
     }
     Sleep, 300
     click1 := scaleX(739)

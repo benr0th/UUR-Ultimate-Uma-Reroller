@@ -6,3 +6,4 @@ Lang/
 *.chm
 *.ini
 file.ahk
+.gitignore
