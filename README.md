@@ -59,7 +59,7 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 - **Q: How long did this take to make?**
   - A: Longer than I'd like to admit. I'm just going to borrow an MLB Kitasan (unless the reroller hits big).
 - **Q: Will you make a mobile version?**
-  - A: No, this took way too much trial and error. That's why I made this open source, so you can see the general idea and maybe someone can make a mobile version. I apologize for the code quality in advanced, I just wanted to get it working while the banner is still relatively new.
+  - A: No, this took way too much trial and error. That's why I made this open source, so you can see the general idea and maybe someone can make a mobile version. I apologize for the code quality in advance, I just wanted to get it working while the banner is still relatively new.
 
 ## Credits
 - [Pulover's Macro Creator](https://www.macrocreator.com/) for easy script creation. (It starts to freak out when it gets this long though)
