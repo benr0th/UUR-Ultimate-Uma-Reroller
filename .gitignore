@@ -1,0 +1,8 @@
+Bin/
+Lang/
+*.pmc
+*.dll
+*.exe
+*.chm
+*.ini
+file.ahk
