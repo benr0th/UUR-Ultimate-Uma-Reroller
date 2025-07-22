@@ -147,7 +147,7 @@ Loop
     y2 := scaleY(1261)
     
     ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250717110651.png
-    PixelSearch, FoundX, FoundX, %x1%, %y1%, %x2%, %y2%, 0x39DEE7, 0, Fast RGB
+    PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x39DEE7, 0, Fast RGB
     Sleep, 100
     If (ErrorLevel = 0)
     {
@@ -1273,8 +1273,8 @@ TakeScreenshot(x1, y1, x2, y2, name)
     region := x1 "|" y1 "|" w "|" h
     ; out := A_ScriptDir "\Screenshots\Screenshot_" A_Now ".png"
     dir := A_ScriptDir "\Screenshots"
-    IfNotExist, dir
-        FileCreateDir, dir
+    IfNotExist, %dir%
+        FileCreateDir, %dir%
     out := dir "\" name ".png"
     start := Gdip_Startup()
     pic := Gdip_BitmapFromScreen(region)
