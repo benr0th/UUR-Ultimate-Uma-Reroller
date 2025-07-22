@@ -40,6 +40,9 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 - Track stats (number of SSRs, number of rerolls done, etc.)
 - Refactor the code so it's actually good
 
+## Known Issues
+- If a connection error popup occurs in the game, the script will be unable to continue and needs to be manually restarted.
+
 ## FAQ
 
 - **Q: Why does the script not work?**
