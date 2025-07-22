@@ -18,7 +18,7 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 ## How to Use
 
 1. Download the script from the repository. (Code -> Download ZIP)
-2. Extract to a folder somewhere and open the script with AutoHotkey.
+2. Extract to a folder somewhere and open the UUR_Ultimate_Uma_Reroller.ahk script with AutoHotkey.
 3. Fill out some configuration options in the window that appears, then the rerolls will commence. You can press `Shift + Escape` to stop the script at any time.
 4. Refrain from using the mouse or keyboard (aside from the hotkey just mentioned of course) while the script is running, as it will interfere with the automation process.
 
@@ -49,7 +49,7 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 - **Q: Where are my screenshots?**
   - A: The script uses Steam to take screenshots, so they will be in your Steam screenshots folder, you can easily view them by looking at the game in your Steam library.
 - **Q: How do I know how many LBs I got?**
-  - A: Right now it doesn't check for this. You'll have to check the screenshots and see which account looks decent enough, log in and see if you got any LBs. Hoping to add this in the future.
+  - A: Right now it doesn't check for this. You'll have to check the screenshots and see which account looks decent enough, log in and see if you got any LBs. Hoping to add this in the future. I've added the option to take a screenshot of each x10 roll in the meantime.
 - **Q: Help! It keeps clicking on the wrong thing and I can't stop it!**
   - A: Press `Shift + Escape` to stop the script.
 - **Q: Why did you make this?**
