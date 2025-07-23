@@ -10,8 +10,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile with Ahk2Exe
-        uses: cennis91/action-ahk2exe@main
-        id: ahk2exe
+        uses: nekocodeX/GitHub-Action-Ahk2Exe@main
         with:
           in: UUR_Ultimate_Uma_Reroller.ahk
           out: UUR.exe
