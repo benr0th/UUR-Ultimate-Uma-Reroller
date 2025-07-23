@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Compile with Ahk2Exe
         uses: cennis91/action-ahk2exe@main
@@ -18,7 +18,7 @@ jobs:
           icon: icon.ico
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: compiled-binary
           path: ${{ steps.ahk2exe.outputs.binary }}
