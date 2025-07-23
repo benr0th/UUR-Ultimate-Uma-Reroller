@@ -18,7 +18,7 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 ## How to Use
 
 1. Download the .exe file from the [latest release](https://github.com/benr0th/UUR-Ultimate-Uma-Reroller/releases/latest).
-2. Extract to a folder somewhere and open the UUR_Ultimate_Uma_Reroller.exe. (The program creates a folder so putting it in its own folder is preferred)
+2. Extract to a folder somewhere and open the UUR.exe. (The program creates a folder so putting it in its own folder is preferred)
 3. Fill out some configuration options in the window that appears, then the rerolls will commence. You can press `Shift + Escape` to stop the script at any time.
 4. Refrain from using the mouse or keyboard (aside from the hotkey just mentioned of course) while the script is running, as it will interfere with the automation process.
 
