@@ -1,0 +1,24 @@
+name: Compile AHK to EXE
+run-name: Compiling .ahk file to .exe binary
+on: [push]
+jobs:
+  Build-Exe:
+    name: Compile
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Compile with Ahk2Exe
+        uses: cennis91/action-ahk2exe@main
+        id: ahk2exe
+        with:
+          in: UUR_Ultimate_Uma_Reroller.ahk
+          out: UUR.exe
+          icon: icon.ico
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: compiled-binary
+          path: ${{ steps.ahk2exe.outputs.binary }}
