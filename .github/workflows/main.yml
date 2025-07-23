@@ -11,16 +11,73 @@ jobs:
 
       - name: Compile with Ahk2Exe
         uses: benmusson/ahk2exe-action@v1
+        if: github.ref_type == 'tag'
         with:
           in: UUR_Ultimate_Uma_Reroller.ahk
           out: UUR.exe
           icon: icon.ico
           target: x64
-          # compression: upx
+          compression: upx
           ahk-tag: v1.1.37.02
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set release variables
+        id: vars
+        shell: pwsh
+        if: github.ref_type == 'tag'
+        run: |
+          $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+          echo "tag_name=$tag" >> $env:GITHUB_OUTPUT
+          echo "release_name=UUR $tag" >> $env:GITHUB_OUTPUT
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Extract changelog section for tag
+        id: changelog
+        shell: pwsh
+        if: github.ref_type == 'tag'
+        run: |
+          $tag = "${{ steps.vars.outputs.tag_name }}"
+          $headerPattern = "## $tag"
+
+          $lines = Get-Content CHANGELOG.md
+          $startIndex = -1
+          $endIndex = $lines.Length
+
+          # Find the line index where the tag section starts
+          for ($i = 0; $i -lt $lines.Length; $i++) {
+            if ($lines[$i].Trim() -eq $headerPattern) {
+              $startIndex = $i + 1
+              break
+            }
+          }
+
+          if ($startIndex -eq -1) {
+            Write-Error "Tag '$tag' not found in CHANGELOG.md"
+            exit 1
+          }
+
+          # Find the next tag header to know where this section ends
+          for ($j = $startIndex; $j -lt $lines.Length; $j++) {
+            if ($lines[$j].Trim() -match '^##\s+') {
+              $endIndex = $j
+              break
+            }
+          }
+
+          # Extract lines for the tag section
+          $bodyLines = $lines[$startIndex..($endIndex - 1)]
+          $body = $bodyLines -join "`n"
+
+          echo "body<<EOF" >> $env:GITHUB_OUTPUT
+          echo "$body" >> $env:GITHUB_OUTPUT
+          echo "EOF" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          name: compiled-binary
-          path: UUR.exe
+          tag_name: ${{ steps.vars.outputs.tag_name }}
+          name: ${{ steps.vars.outputs.release_name }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: UUR.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
