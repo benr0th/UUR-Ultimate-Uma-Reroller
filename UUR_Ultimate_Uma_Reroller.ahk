@@ -724,13 +724,11 @@ Loop
         click2 := scaleY(877)
         Sleep, 600
         Click, %click1%, %click2% Left, 1  ; Move banner
-        Sleep, 10
-        Sleep, 600
-        Click, %click1%, %click2% Left, 1  ; Move banner
-        Sleep, 10
-        Sleep, 600
-        Click, %click1%, %click2% Left, 1  ; Move banner
-        Sleep, 10
+        Sleep, 100
+        ; Sleep, 600
+        ; Click, %click1%, %click2% Left, 1  ; Move banner
+        ; Sleep, 600
+        ; Click, %click1%, %click2% Left, 1  ; Move banner
     }
     ; x1 := scaleX(533)
     ; y1 := scaleY(807)
