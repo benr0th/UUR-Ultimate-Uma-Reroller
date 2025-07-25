@@ -1,6 +1,11 @@
 name: Compile AHK to EXE
 run-name: Compiling .ahk file to .exe binary
-on: [push]
+on:
+  push:
+    tags:
+      - v*.*.*
+permissions:
+  contents: write
 jobs:
   Build-Exe:
     name: Compile
@@ -11,7 +16,6 @@ jobs:
 
       - name: Compile with Ahk2Exe
         uses: benmusson/ahk2exe-action@v1
-        if: github.ref_type == 'tag'
         with:
           in: UUR_Ultimate_Uma_Reroller.ahk
           out: UUR.exe
@@ -24,7 +28,6 @@ jobs:
       - name: Set release variables
         id: vars
         shell: pwsh
-        if: github.ref_type == 'tag'
         run: |
           $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
           echo "tag_name=$tag" >> $env:GITHUB_OUTPUT
@@ -33,7 +36,6 @@ jobs:
       - name: Extract changelog section for tag
         id: changelog
         shell: pwsh
-        if: github.ref_type == 'tag'
         run: |
           $tag = "${{ steps.vars.outputs.tag_name }}"
           $headerPattern = "## $tag"
@@ -73,7 +75,6 @@ jobs:
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
         with:
           tag_name: ${{ steps.vars.outputs.tag_name }}
           name: ${{ steps.vars.outputs.release_name }}
