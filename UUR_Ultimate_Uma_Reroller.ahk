@@ -21,7 +21,8 @@ CoordMode, Pixel, Screen
 
 ; F3:: ; For testing stuff
 ; ; ManualRollDetect()
-; ManualSaveID()
+; ; ManualSaveID()
+
 ; Return
 
 ; TODO: Better banner detection
@@ -35,7 +36,6 @@ GREYED_OUT_CONFIRM := 0x5E8605
 SCOUT := 0xd9683e
 KITA_HAIR := 0x45434c
 KITA_CARD_COLOR := 0xfffa69
-filePath := "SavedTrainerIDs.txt"
 
 Intro:
 SysGet, MonitorCount, MonitorCount
@@ -48,9 +48,9 @@ Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used fo
 Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
 Gui Add, Text, x31 y210 w400 h23 +0x200, Number of target SSR obtained to save account
-Target_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it."
-Gui Add, Edit, vTarget x32 y233 w121 h21 +Limit1
-Gui, Add, UpDown, vTargetNum Range0-5, 2
+TargetNum_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it."
+Gui Add, Edit, vTargetNum x32 y233 w121 h21 +Limit1
+Gui, Add, UpDown, Range0-5, 2
 
 Gui Add, Text, x31 y270 w400 h23 +0x200, Choose which monitor to roll on (defaults to main display)
 Gui Add, ComboBox, hWndComboBox vMonitorDropdown x31 y293 w120 +AltSubmit Choose1
@@ -131,11 +131,13 @@ rollResults := []
 onTitleScreen := 0
 preLinkDone := 0
 timeStarted := A_Now
+targetSSR := 0 ; Target SSR gotten per account roll
 SysGet, resolution, Monitor, %MonitorDropdown%
 
 Loop
 {
-    targetSSR := 0 ; Target SSR gotten per account roll
+    global targetSSR
+    targetSSR := 0
     WinActivate, Umamusume ahk_class UnityWndClass
     Sleep, 333
     WinWaitActive, Umamusume ahk_class UnityWndClass, , 10
@@ -1061,9 +1063,10 @@ Loop
         Sleep, 100
     }
     Until ErrorLevel = 0
-    If (ErrorLevel = 0 and targetSSR >= TargetNum)
+    If (ErrorLevel = 0)
     {
-        Send, {F12}  ; Take screenshot
+        If (targetSSR >= TargetNum)
+            Send, {F12}  ; Take screenshot
     }
     Sleep, 300
     If (targetSSR >= TargetNum) {
@@ -1073,7 +1076,7 @@ Loop
     Sleep, 100
 
     ; End of reroll loop
-    MsgBox, 0, , % "Target SSRs obtained: " . targetSSR
+    ; MsgBox, 0, , % "Target SSRs obtained: " . targetSSR
 }
 Return
 
@@ -1168,6 +1171,7 @@ GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs, ByRef targetSSR)
 
 DataLink(pass)
 {
+    global targetSSR
     x1 := scaleX(1912)
     y1 := scaleY(950)
     x2 := scaleX(2183)
@@ -1307,16 +1311,18 @@ DataLink(pass)
     If (ErrorLevel = 0)
     {
         Sleep, 500
-        Send, {F12}  ; Take screenshot
-
-        x1 := scaleX(716)
-        y1 := scaleY(631)
-        x2 := scaleX(1001)
-        y2 := scaleY(676)
+        x1 := scaleX(696)
+        y1 := scaleY(619)
+        x2 := scaleX(1004)
+        y2 := scaleY(683)
 
         trainerID := GetTrainerID(x1, y1, x2, y2)
         saved := Trim(trainerID, "`n") . ": " . targetSSR
+        filePath := "SavedTrainerIDs.txt"
         FileAppend, %saved%`n, %filePath% ; Save trainer ID and target SSRs gotten to text file
+        Sleep, 200
+
+        Send, {F12}  ; Take screenshot of Trainer ID
     }
     Sleep, 1500
     click1 := scaleX(739)
