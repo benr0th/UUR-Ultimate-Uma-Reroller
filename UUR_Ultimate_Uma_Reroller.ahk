@@ -49,17 +49,22 @@ Gui Add, Edit, hWndhEdtValue vdate x32 y53 w121 h21, 199101
 Gui Add, Text, x32 y90 w247 h23 +0x200, Enter the username that will be used for each reroll
 Gui Add, Edit, hWndhEdtValue2 vname x31 y113 w121 h21, PraiseRNG
 Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used for data link (This is not stored anywhere)
-Gui Add, Edit, hWndhEdtValue3 vpass x31 y172 w121 h21
+Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
-Gui Add, Text, x31 y210 w400 h23 +0x200, Choose which monitor to roll on (defaults to main display)
-Gui Add, ComboBox, hWndComboBox vMonitorDropdown x31 y235 w120 +AltSubmit Choose1
-Gui Add, Button, vOK x270 y370 w80 h23, &OK
+Gui Add, Text, x31 y210 w400 h23 +0x200, Number of target SSR obtained to save account
+Target_TT := "The minimum amount of the target banner SSR obtained to Data Link an account.`nIf the account did not get at least this many, the script will not Data Link it."
+Gui Add, Edit, vTarget x32 y233 w121 h21 +Limit1
+Gui, Add, UpDown, vTargetNum Range0-5, 2
 
-Gui Add, CheckBox, hWndhChk vpreDataLink x31 y272 w350 h22 +Checked, Set Data Link for current account (Must be logged in already)
-Gui Add, CheckBox, hWndhChk2 vMoreScreenshots x31 y302 w350 h22, Take a screenshot for each x10 roll
-Gui, Font, cRed
-Gui Add, Text, x31 y324 w350 h15 +0x200, (TEMPORARY - Use this if you want to see your roll results easier.
-Gui Add, Text, x31 y339 w350 h15 +0x200, Will create 11 screenshots each reroll, stacks up quickly)
+Gui Add, Text, x31 y270 w400 h23 +0x200, Choose which monitor to roll on (defaults to main display)
+Gui Add, ComboBox, hWndComboBox vMonitorDropdown x31 y293 w120 +AltSubmit Choose1
+
+Gui Add, CheckBox, hWndhChk vpreDataLink x31 y330 w350 h22 +Checked, Set Data Link for current account (Must be logged in already)
+Gui Add, CheckBox, hWndhChk2 vMoreScreenshots x31 y360 w350 h22, Take a screenshot for each x10 roll
+; Gui, Font, cRed
+; Gui Add, Text, x31 y324 w350 h15 +0x200, (TEMPORARY - Use this if you want to see your roll results easier.
+; Gui Add, Text, x31 y339 w350 h15 +0x200, Will create 11 screenshots each reroll, stacks up quickly)
+Gui Add, Button, vOK x270 y470 w80 h23, &OK
 
 Gui, Font, cDefault
 Gui Add, Text, x430 y40 w210, Welcome to UUR (Ultimate Uma Reroller)! This script will infinitely reroll on the Kitasan Black banner. `n`nThis is the order of operations: `n- deletes the current account`n- makes a new one`n- grabs the carats from the gifts and rolls until out of carats`n- takes a screenshot of the List view of Support Cards`n- sets up a Data Link and takes a screenshot of the trainer ID, then restarts.`n`n`n`nThe script will start after pressing the OK button. `nPress Shift+Escape to stop the script at any time.
@@ -74,8 +79,34 @@ Loop, %MonitorCount%
 SysGet, MonitorMain, MonitorPrimary
 GuiControl, Choose, MonitorDropdown, %MonitorMain%
 
-Gui Show, w650 h420, UUR Options
+Gui Show, w650 h520, UUR Options
+OnMessage(0x200, "WM_MOUSEMOVE")
 Return
+
+; Credit to Rogers on AHK forum for mouse over tooltip
+WM_MOUSEMOVE()
+{
+    static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
+    CurrControl := A_GuiControl
+    If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    {
+        ToolTip  ; Turn off any previous tooltip.
+        SetTimer, DisplayToolTip, 1000
+        PrevControl := CurrControl
+    }
+    return
+
+    DisplayToolTip:
+    SetTimer, DisplayToolTip, Off
+    ToolTip % %CurrControl%_TT  ; The leading percent sign tell it to use an expression.
+    SetTimer, RemoveToolTip, 10000
+    return
+
+    RemoveToolTip:
+    SetTimer, RemoveToolTip, Off
+    ToolTip
+    return
+}
 
 ButtonOK:
     Gui Submit
@@ -639,7 +670,7 @@ Loop
         click2 := scaleY(1330)
         Click, %click1%, %click2% Left, 1  ; Get gifts
     }
-    Sleep, 3000 ; Sometimes this takes a long time
+    Sleep, 5000 ; Sometimes this takes a long time
     ; x1 := scaleX(410)
     ; y1 := scaleY(1273)
     ; x2 := scaleX(1081)
@@ -824,7 +855,7 @@ Loop
             Else
             {
                 
-                rollResults := GetRollResults(SSRs, SRs, Rs)
+                rollResults := GetRollResults(SSRs, SRs, Rs, targetSSR)
                 ; MsgBox, 0, , % "SSR: " . rollResults[1] . ", SR: " . rollResults[2] . ", R: " rollResults[3]
                 
                 Sleep, 200
@@ -1038,7 +1069,9 @@ Loop
         Send, {F12}  ; Take screenshot
     }
     Sleep, 300
-    DataLink(pass)
+    If (targetSSR >= TargetNum) {
+        DataLink(pass)
+    }
 
     Sleep, 100
 
@@ -1096,7 +1129,7 @@ FindRarity(x1, y1, x2, y2)
     }
 }
 
-GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs)
+GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs, ByRef targetSSR)
 {
     positions := [[426,165,464,187], [666,166,707,187], [908,167,950,187], [546,435,586,457], [787,435,830,455], [423,710,465,730], [667,710,707,729], [909,707,949,729], [546,979,587,1001], [789,980,829,1002]]
     fullCardpositions := [[411,149,475,199], [624,140,835,384], [871,138,1087,384], [520,417,710,648], [769,411,946,651], [373,675,597,924], [644,688,832,923], [865,678,1077,922], [520,959,708,1193], [750,959,967,1194]]
@@ -1133,7 +1166,7 @@ GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs)
             Rs += 1
         }
     }
-    return [SSRs, SRs, Rs]
+    return [SSRs, SRs, Rs, targetSSR]
 }
 
 DataLink(pass)
