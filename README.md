@@ -22,6 +22,16 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 3. Fill out some configuration options in the window that appears, then the rerolls will commence. You can press `Shift + Escape` to stop the script at any time.
 4. Refrain from using the mouse or keyboard (aside from the hotkey just mentioned of course) while the script is running, as it will interfere with the automation process.
 
+## Configuration Options
+
+- **Age Date**: The date that will be used for each reroll, e.g. `199101`.
+- **Username**: The username that will be used for each reroll.
+- **Password**: The password that will be used for Data Linking, it is not saved anywhere.
+- **Target SSR Threshold**: The minimum amount of the target banner SSR obtained to Data Link and screenshot an account. If the account did not get at least this many, the script will not Data Link or screenshot it. Set to 0 to save and screenshot all accounts.
+- **Monitor**: Which monitor to use for the script, for if you have multiple monitors. Defaults to the main display, so anyone with a single monitor can leave this as is.
+- **Data Link Current Account**: If checked, sets up Data Link for the current account before rerolling. Must be logged in already. (Default: ON, to prevent accidental account deletion)
+- **Screenshot Each x10 Roll**: If checked, takes a screenshot of each x10 roll. (Default: OFF, to prevent spam screenshots)
+
 ## Features
 
 - Rerolls with the following process:
@@ -34,21 +44,23 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 
 ## Future Plans
 
-- Track the number of LBs gotten of a target card (or any SSR)
+- ~~Track the number of LBs gotten of a target card~~ Track number of LBs of any SSR
 - Add ability to roll on any banner
 - Add ability to set how many rerolls to do (e.g. stop after target LB)
 - Track stats (number of SSRs, number of rerolls done, etc.)
 - Refactor the code so it's actually good
 
 ## Known Issues
+
 - If a connection error popup occurs in the game, the script will be unable to continue and needs to be manually restarted.
+- Doing a pre-reroll Data Link will save the current Trainer ID to text file but the target SSR obtained will always be 0.
 
 ## FAQ
 
 - **Q: Why does the script not work?**
   - A: Ensure that you have the correct version of AutoHotkey installed.
 - **Q: It's not clicking anything correctly!**
-  - A: This was only tested on my machine, so it may not work as well on others. It **should** work on any resolution, but it was tested on 1440p. Please make a GitHub issue if you're having a specific and consistent problem.
+  - A: This was only tested on my machine, so it may not work as well on others. It **should** work on any resolution, but it was tested on 1440p and 1080p. Please make a GitHub issue if you're having a specific and consistent problem.
 - **Q: Where are my screenshots?**
   - A: The script uses Steam to take screenshots, so they will be in your Steam screenshots folder, you can easily view them by looking at the game in your Steam library.
 - **Q: How do I know how many LBs I got?**
@@ -58,9 +70,9 @@ This script is not affiliated with or endorsed by Cygames, Inc. or any of its su
 - **Q: Why did you make this?**
   - A: I didn't get any Kitasan on my main account and wanted to reroll for her, making a macro was too inconsistent so I made a more consistent script. Also it seemed fun to make.
 - **Q: How does it work?**
-  - A: It uses image recognition to click parts of the game that inconsistently load by waiting for the images to appear on the screen.
+  - A: It uses image recognition and pixel searching to click parts of the game that inconsistently load by waiting for the images or pixels to appear on the screen.
 - **Q: How long did this take to make?**
-  - A: Longer than I'd like to admit. I'm just going to borrow an MLB Kitasan (unless the reroller hits big).
+  - A: Longer than I'd like to admit. ~~I'm just going to borrow an MLB Kitasan (unless the reroller hits big).~~ It was worth it I got a 3LB Kitasan.
 - **Q: Will you make a mobile version?**
   - A: No, this took way too much trial and error. That's why I made this open source, so you can see the general idea and maybe someone can make a mobile version. I apologize for the code quality in advance, I just wanted to get it working while the banner is still relatively new.
 
