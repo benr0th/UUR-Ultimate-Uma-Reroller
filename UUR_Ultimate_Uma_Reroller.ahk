@@ -20,7 +20,7 @@ SetBatchLines -1
 CoordMode, Pixel, Screen
 
 ; F3:: ; For testing stuff
-; ; ManualRollDetect()
+; ManualRollDetect()
 ; ; ManualSaveID()
 
 ; Return
@@ -1096,12 +1096,8 @@ FindRarity(x1, y1, x2, y2)
     {
         PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x9266d6, 9, Fast RGB
         
-        ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screen_20250718195829.png
-        ; PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0xA3E180, 0, Fast RGB
-        ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screen_20250721012834.png
         If (ErrorLevel = 0)
         {
-            
             ; MsgBox, 0, , found ssr
             return "SSR"
         }
@@ -1123,9 +1119,6 @@ FindRarity(x1, y1, x2, y2)
         
         Sleep, 100
         return ""
-        /*
-        MsgBox, 0, , searched %x1% %y1% %x2% %y2%
-        */
     }
 }
 
@@ -1373,8 +1366,9 @@ ManualRollDetect()
     SSRs := 0
     SRs := 0
     Rs := 0
+    targetSSR := 0
     rolls := GetRollResults(SSRs, SRs, Rs, targetSSR)
-    MsgBox, 0, , % "SSRs: " . rolls[1] . "SRs: " . rolls[2] . "Rs: " . rolls[3]
+    MsgBox, 0, , % "Target: " . rolls[4] . " SSRs: " . rolls[1] . " SRs: " . rolls[2] . " Rs: " . rolls[3]
 }
 
 ManualSaveID()
