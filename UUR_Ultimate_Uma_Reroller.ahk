@@ -1367,7 +1367,7 @@ ManualRollDetect()
     SSRs := 0
     SRs := 0
     Rs := 0
-    rolls := GetRollResults(SSRs, SRs, Rs)
+    rolls := GetRollResults(SSRs, SRs, Rs, targetSSR)
     MsgBox, 0, , % "SSRs: " . rolls[1] . "SRs: " . rolls[2] . "Rs: " . rolls[3]
 }
 
