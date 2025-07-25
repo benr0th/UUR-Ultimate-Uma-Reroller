@@ -1,11 +1,12 @@
 Bin/
 Lang/
+dev/
 *.pmc
 *.dll
 *.exe
 *.chm
 *.ini
-file.ahk
+*.txt
 .gitignore
 draw.ahk
 *.png

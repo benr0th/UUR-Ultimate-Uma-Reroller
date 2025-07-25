@@ -5,6 +5,7 @@
 SetWorkingDir %A_ScriptDir%
 #Include, %A_ScriptDir%\Gdip_All.ahk
 #Include, %A_ScriptDir%\FindText.ahk
+#Include, %A_ScriptDir%\OCR.ahk
 CoordMode, Mouse, Screen
 SendMode Input
 #SingleInstance Force
@@ -18,19 +19,13 @@ SetBatchLines -1
 
 CoordMode, Pixel, Screen
 
-; F3:: ; Manually test roll tracker, use when on roll results screen
-; SSRs := 0
-; SRs := 0
-; Rs := 0
-; rolls := GetRollResults(SSRs, SRs, Rs)
-; MsgBox, 0, , % rolls[1] rolls[2] rolls[3]
+; F3:: ; For testing stuff
+; ; ManualRollDetect()
+; ManualSaveID()
 ; Return
 
-; TODO: Track accounts that get Kitasan (OCR to read Trainer ID, save to map)
-; TODO: Track Kitasans
-; TODO: Neatly organize good accounts (e.g. Kitasan > 2), save to text file?
-; TODO: Display stats when exiting
-
+; TODO: Better banner detection
+; TODO: Better target SSR detection (unique pixel check?)
 
 NORMAL_TEXT := 0x794016
 RED_EXCLAMATION := 0xFF6943
@@ -40,6 +35,7 @@ GREYED_OUT_CONFIRM := 0x5E8605
 SCOUT := 0xd9683e
 KITA_HAIR := 0x45434c
 KITA_CARD_COLOR := 0xfffa69
+filePath := "SavedTrainerIDs.txt"
 
 Intro:
 SysGet, MonitorCount, MonitorCount
@@ -52,7 +48,7 @@ Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used fo
 Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
 Gui Add, Text, x31 y210 w400 h23 +0x200, Number of target SSR obtained to save account
-Target_TT := "The minimum amount of the target banner SSR obtained to Data Link an account.`nIf the account did not get at least this many, the script will not Data Link it."
+Target_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it."
 Gui Add, Edit, vTarget x32 y233 w121 h21 +Limit1
 Gui, Add, UpDown, vTargetNum Range0-5, 2
 
@@ -134,6 +130,7 @@ Rs := 0
 rollResults := []
 onTitleScreen := 0
 preLinkDone := 0
+timeStarted := A_Now
 SysGet, resolution, Monitor, %MonitorDropdown%
 
 Loop
@@ -1064,7 +1061,7 @@ Loop
         Sleep, 100
     }
     Until ErrorLevel = 0
-    If (ErrorLevel = 0)
+    If (ErrorLevel = 0 and targetSSR >= TargetNum)
     {
         Send, {F12}  ; Take screenshot
     }
@@ -1311,6 +1308,15 @@ DataLink(pass)
     {
         Sleep, 500
         Send, {F12}  ; Take screenshot
+
+        x1 := scaleX(716)
+        y1 := scaleY(631)
+        x2 := scaleX(1001)
+        y2 := scaleY(676)
+
+        trainerID := GetTrainerID(x1, y1, x2, y2)
+        saved := Trim(trainerID, "`n") . ": " . targetSSR
+        FileAppend, %saved%`n, %filePath% ; Save trainer ID and target SSRs gotten to text file
     }
     Sleep, 1500
     click1 := scaleX(739)
@@ -1336,6 +1342,14 @@ TakeScreenshot(x1, y1, x2, y2, name)
     return out
 }
 
+GetTrainerID(x1, y1, x2, y2)
+{
+    trainer_pic := TakeScreenshot(x1, y1, x2, y2, "trainer")
+    trainerID := ocr(trainer_pic, "en")
+    FileDelete, %trainer_pic%
+    return trainerID
+}
+
 GetScreenshot(x1, y1, x2, y2, name)
 {
     screen := A_ScriptDir "\Screenshots" "\" name ".png"
@@ -1345,6 +1359,31 @@ GetScreenshot(x1, y1, x2, y2, name)
         screen := TakeScreenshot(x1, y1, x2, y2, name)
     }
     return screen
+}
+
+;! For testing purporses only
+ManualRollDetect()
+{
+    SSRs := 0
+    SRs := 0
+    Rs := 0
+    rolls := GetRollResults(SSRs, SRs, Rs)
+    MsgBox, 0, , % "SSRs: " . rolls[1] . "SRs: " . rolls[2] . "Rs: " . rolls[3]
+}
+
+ManualSaveID()
+{
+    filePath := "SavedTrainerIDs.txt"
+    x1 := scaleX(696)
+    y1 := scaleY(619)
+    x2 := scaleX(1004)
+    y2 := scaleY(683)
+
+    trainerID := GetTrainerID(x1, y1, x2, y2)
+    targetSSR := 2
+    saved := Trim(trainerID, "`n") . ": " . targetSSR
+    FileAppend, %saved%`n, %filePath%
+    ; MsgBox, 0, , % trainerID
 }
 
 +Escape::
