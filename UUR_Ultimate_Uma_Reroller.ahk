@@ -48,7 +48,7 @@ Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used fo
 Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
 Gui Add, Text, x31 y210 w400 h23 +0x200, Number of target SSR obtained to save account
-TargetNum_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it."
+TargetNum_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it.`nSet to 0 to save all accounts."
 Gui Add, Edit, vTargetNum x32 y233 w121 h21 +Limit1
 Gui, Add, UpDown, Range0-5, 2
 
@@ -136,7 +136,7 @@ SysGet, resolution, Monitor, %MonitorDropdown%
 
 Loop
 {
-    global targetSSR
+    global targetSSR, preLinkDone, onTitleScreen
     targetSSR := 0
     WinActivate, Umamusume ahk_class UnityWndClass
     Sleep, 333
