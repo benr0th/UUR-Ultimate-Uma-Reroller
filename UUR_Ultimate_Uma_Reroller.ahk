@@ -4,6 +4,7 @@
 #NoEnv
 SetWorkingDir %A_ScriptDir%
 #Include, %A_ScriptDir%\Gdip_All.ahk
+#Include, %A_ScriptDir%\FindText.ahk
 CoordMode, Mouse, Screen
 SendMode Input
 #SingleInstance Force
@@ -22,8 +23,8 @@ CoordMode, Pixel, Screen
 ; SRs := 0
 ; Rs := 0
 ; rolls := GetRollResults(SSRs, SRs, Rs)
-; MsgBox, 0, , % SSR: rolls[1] SR: rolls[2] R: rolls[3]
-; ExitApp
+; MsgBox, 0, , % rolls[1] rolls[2] rolls[3]
+; Return
 
 ; TODO: Track accounts that get Kitasan (OCR to read Trainer ID, save to map)
 ; TODO: Track Kitasans
@@ -38,6 +39,7 @@ CONFIRM2 := 0x94d708
 GREYED_OUT_CONFIRM := 0x5E8605
 SCOUT := 0xd9683e
 KITA_HAIR := 0x45434c
+KITA_CARD_COLOR := 0xfffa69
 
 Intro:
 SysGet, MonitorCount, MonitorCount
@@ -98,13 +100,14 @@ Macro1:
 SSRs := 0
 SRs := 0
 Rs := 0
-kitas := 0
 rollResults := []
 onTitleScreen := 0
-SysGet, resolution, Monitor, %MonitorDropdown%
 preLinkDone := 0
+SysGet, resolution, Monitor, %MonitorDropdown%
+
 Loop
 {
+    targetSSR := 0 ; Target SSR gotten per account roll
     WinActivate, Umamusume ahk_class UnityWndClass
     Sleep, 333
     WinWaitActive, Umamusume ahk_class UnityWndClass, , 10
@@ -820,10 +823,10 @@ Loop
             }
             Else
             {
-                /*
+                
                 rollResults := GetRollResults(SSRs, SRs, Rs)
-                MsgBox, 0, , % rollResults[1] rollResults[2] rollResults[3]
-                */
+                ; MsgBox, 0, , % "SSR: " . rollResults[1] . ", SR: " . rollResults[2] . ", R: " rollResults[3]
+                
                 Sleep, 200
                 
                 Break
@@ -1038,9 +1041,9 @@ Loop
     DataLink(pass)
 
     Sleep, 100
-    /*
-    MsgBox, 0, , % rollResults
-    */
+
+    ; End of reroll loop
+    MsgBox, 0, , % "Target SSRs obtained: " . targetSSR
 }
 Return
 
@@ -1058,7 +1061,7 @@ FindRarity(x1, y1, x2, y2)
 {
     Loop
     {
-        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x89C5EC, 0, Fast RGB
+        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x9266d6, 9, Fast RGB
         
         ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screen_20250718195829.png
         ; PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0xA3E180, 0, Fast RGB
@@ -1071,14 +1074,14 @@ FindRarity(x1, y1, x2, y2)
         }
         
         
-        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0xC69E08, 0, Fast RGB
+        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0xf2db96, 7, Fast RGB
         If (ErrorLevel = 0)
         {
             ; MsgBox, 0, , found sr
             return "SR"
         }
         
-        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x6B82AD, 0, Fast RGB
+        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0xadd9ee, 6, Fast RGB
         If (ErrorLevel = 0)
         {
             ; MsgBox, 0, , found r
@@ -1095,13 +1098,31 @@ FindRarity(x1, y1, x2, y2)
 
 GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs)
 {
-    positions := [[411,149,475,199], [624,140,835,384], [871,138,1087,384], [520,417,710,648], [769,411,946,651], [373,675,597,924], [644,688,832,923], [865,678,1077,922], [520,959,708,1193], [750,959,967,1194]]
+    positions := [[426,165,464,187], [666,166,707,187], [908,167,950,187], [546,435,586,457], [787,435,830,455], [423,710,465,730], [667,710,707,729], [909,707,949,729], [546,979,587,1001], [789,980,829,1002]]
+    fullCardpositions := [[411,149,475,199], [624,140,835,384], [871,138,1087,384], [520,417,710,648], [769,411,946,651], [373,675,597,924], [644,688,832,923], [865,678,1077,922], [520,959,708,1193], [750,959,967,1194]]
     For index, pos in positions
     {
-        card := FindRarity(pos[1], pos[2], pos[3], pos[4])
+        x1 := scaleX(pos[1])
+        y1 := scaleY(pos[2])
+        x2 := scaleX(pos[3])
+        y2 := scaleY(pos[4])
+        card := FindRarity(x1, y1, x2, y2)
         If (card = "SSR")
         {
             SSRs += 1
+
+            ; Check if SSR is banner target
+            targetX1 := scaleX(fullCardpositions[index][1])
+            targetY1 := scaleY(fullCardpositions[index][2])
+            targetX2 := scaleX(fullCardpositions[index][3])
+            targetY2 := scaleY(fullCardpositions[index][4])
+            PixelSearch, FoundX, FoundY, %targetX1%, %targetY1%, %targetX2%, %targetY2%, 0xfffa69, 2, Fast RGB ; Kitasan Black
+            If (ErrorLevel = 0)
+            {
+                ; MsgBox, 0, , % "found kitasan at " . index
+                targetSSR += 1
+            }
+
         }
         If (card = "SR")
         {
