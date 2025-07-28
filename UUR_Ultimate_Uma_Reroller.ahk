@@ -758,8 +758,8 @@ Loop
         Sleep, 600
         Click, %click1%, %click2% Left, 1  ; Move banner
         Sleep, 100
-        ; Sleep, 600
-        ; Click, %click1%, %click2% Left, 1  ; Move banner
+        Sleep, 600
+        Click, %click1%, %click2% Left, 1  ; Move banner
         ; Sleep, 600
         ; Click, %click1%, %click2% Left, 1  ; Move banner
     }

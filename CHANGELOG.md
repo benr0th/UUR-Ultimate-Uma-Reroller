@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.9.1
+
+- Changed amount of times to move banner since some were added
+
 ## v0.9.0
 
 - Added roll rarity detection and Kitasan Black detection
