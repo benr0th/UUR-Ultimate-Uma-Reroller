@@ -3,9 +3,11 @@
 #Requires AutoHotkey v1.1+
 #NoEnv
 SetWorkingDir %A_ScriptDir%
-#Include, %A_ScriptDir%\Gdip_All.ahk
-#Include, %A_ScriptDir%\FindText.ahk
-#Include, %A_ScriptDir%\OCR.ahk
+; #Include, %A_ScriptDir%\Gdip_All.ahk
+#Include <Gdip_All>
+#Include <FindText>
+#Include <OCR>
+#Include <Jxon>
 CoordMode, Mouse, Screen
 SendMode Input
 #SingleInstance Force
@@ -25,7 +27,6 @@ CoordMode, Pixel, Screen
 
 ; Return
 
-; TODO: Better banner detection
 ; TODO: Better target SSR detection (unique pixel check?)
 
 NORMAL_TEXT := 0x794016
@@ -47,24 +48,25 @@ Gui Add, Edit, hWndhEdtValue2 vname x31 y113 w121 h21, PraiseRNG
 Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used for data link (This is not stored anywhere)
 Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
-Gui Add, Text, x31 y210 w400 h23 +0x200, Number of target SSR obtained to save account
+Gui Add, Text, x31 y210 w375 h23 +0x200, Choose banner to roll on
+Gui Add, DropDownList, vBannerDropdown x31 y233 w200 +AltSubmit Choose1, Loading...
+
+Gui Add, Text, x31 y270 w400 h23 +0x200, Number of target SSR obtained to save account
 TargetNum_TT := "The minimum amount of the target banner SSR obtained to Data Link and screenshot an account.`nIf the account did not get at least this many, the script will not Data Link or screenshot it.`nSet to 0 to save all accounts."
-Gui Add, Edit, vTargetNum x32 y233 w121 h21 +Limit1
+Gui Add, Edit, vTargetNum x32 y293 w121 h21 +Limit1
 Gui, Add, UpDown, Range0-5, 2
 
-Gui Add, Text, x31 y270 w400 h23 +0x200, Choose which monitor to roll on (defaults to main display)
-Gui Add, ComboBox, hWndComboBox vMonitorDropdown x31 y293 w120 +AltSubmit Choose1
+Gui Add, Text, x31 y330 w400 h23 +0x200, Choose which monitor to roll on (defaults to main display)
+Gui Add, DropDownList, hWndComboBox vMonitorDropdown x31 y353 w120 +AltSubmit Choose1
 
-Gui Add, CheckBox, hWndhChk vpreDataLink x31 y330 w350 h22 +Checked, Set Data Link for current account (Must be logged in already)
-Gui Add, CheckBox, hWndhChk2 vMoreScreenshots x31 y360 w350 h22, Take a screenshot for each x10 roll
-; Gui, Font, cRed
-; Gui Add, Text, x31 y324 w350 h15 +0x200, (TEMPORARY - Use this if you want to see your roll results easier.
-; Gui Add, Text, x31 y339 w350 h15 +0x200, Will create 11 screenshots each reroll, stacks up quickly)
+Gui Add, CheckBox, hWndhChk vpreDataLink x31 y390 w350 h22 +Checked, Set Data Link for current account (Must be logged in already)
+Gui Add, CheckBox, hWndhChk2 vMoreScreenshots x31 y413 w350 h22, Take a screenshot for each x10 roll
 Gui Add, Button, vOK x270 y470 w80 h23, &OK
 
 Gui, Font, cDefault
-Gui Add, Text, x430 y40 w210, Welcome to UUR (Ultimate Uma Reroller)! This script will infinitely reroll on the Kitasan Black banner. `n`nThis is the order of operations: `n- deletes the current account`n- makes a new one`n- grabs the carats from the gifts and rolls until out of carats`n- takes a screenshot of the List view of Support Cards`n- sets up a Data Link and takes a screenshot of the trainer ID, then restarts.`n`n`n`nThe script will start after pressing the OK button. `nPress Shift+Escape to stop the script at any time.
+Gui Add, Text, x430 y40 w260, Welcome to UUR (Ultimate Uma Reroller)!`nThis script will infinitely reroll on the chosen banner. `n`n`nThis is the order of operations: `n  - deletes the current account`n - makes a new one`n  - grabs the carats from the gifts and rolls until out`n  - If the target SSR obtained treshold is met:`n    - takes a screenshot of the List view of Support Cards`n    - sets up a Data Link and takes a screenshot of the trainer ID`n    - saves the trainer ID and amount of target SSRs obtained to a text file, then restarts the process`n`n`n`nThe script will start after pressing the OK button. `nPress Shift+Escape to stop the script at any time.
 
+; Get monitors and fill in dropdown
 Loop, %MonitorCount%
 {
     SysGet, MonitorName, MonitorName, %A_Index%
@@ -75,7 +77,11 @@ Loop, %MonitorCount%
 SysGet, MonitorMain, MonitorPrimary
 GuiControl, Choose, MonitorDropdown, %MonitorMain%
 
-Gui Show, w650 h520, UUR Options
+Gui Show, w700 h520, UUR Options
+
+; Get current banners and fill in dropdown, timer used for pseudo-async
+SetTimer, AsyncBanner, 10
+
 OnMessage(0x200, "WM_MOUSEMOVE")
 Return
 
@@ -747,7 +753,7 @@ Loop
     Loop
     {
         ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250717220503.png
-        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %NORMAL_TEXT%, 0, Fast RGB
+        PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %NORMAL_TEXT%, 0, Fast RGB ; Scout has loaded
         Sleep, 100
     }
     Until ErrorLevel = 0
@@ -756,12 +762,11 @@ Loop
         click1 := scaleX(1232)
         click2 := scaleY(877)
         Sleep, 600
-        Click, %click1%, %click2% Left, 1  ; Move banner
-        Sleep, 100
-        Sleep, 600
-        Click, %click1%, %click2% Left, 1  ; Move banner
-        ; Sleep, 600
-        ; Click, %click1%, %click2% Left, 1  ; Move banner
+        Loop, % BannerDropdown - 1 ; Clicks next banner as many times as needed to get to desired banner
+        {
+            Click, %click1%, %click2% Left, 1  ; Move banner
+            Sleep, 600
+        }
     }
     ; x1 := scaleX(533)
     ; y1 := scaleY(807)
@@ -1360,6 +1365,25 @@ GetScreenshot(x1, y1, x2, y2, name)
     return screen
 }
 
+GetCurrentBanners()
+{
+    oWhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+    oWhr.Open("GET", "https://gametora.com/_next/data/lLJCGO23QpYBN9lJn1l-Z/umamusume.json", false)
+    oWhr.Send()
+    json := oWhr.ResponseText
+
+    data := Jxon_Load(json)
+    enTable := data.pageProps.currentGacha.en
+    banners := {}
+    FileInstall, fetch_banner.ahk, %A_ScriptDir%\fetch_banner.ahk, 1
+    FileInstall, Lib\Jxon.ahk, %A_ScriptDir%\Jxon.ahk, 1
+    for idx, gacha in enTable
+    {
+        ; Dumb workaround to allow for asynchronous fetching, python interop might be better (and faster)
+        RunWait, % "fetch_banner.ahk " gacha.id, , Hide
+    }
+}
+
 ;! For testing purporses only
 ManualRollDetect()
 {
@@ -1386,11 +1410,22 @@ ManualSaveID()
     ; MsgBox, 0, , % trainerID
 }
 
+AsyncBanner:
+    GetCurrentBanners()
+    FileRead, banners, banners.txt
+    GuiControl, , BannerDropdown, |
+    Loop, Parse, banners, `n, `r
+    {
+        GuiControl, , BannerDropdown, %A_LoopField%
+    }
+    Sleep, 100
+    GuiControl, Choose, BannerDropdown, 1
+    SetTimer, AsyncBanner, Off
+    FileDelete, banners.txt
+    FileDelete, %A_ScriptDir%\fetch_banner.ahk
+    FileDelete, %A_ScriptDir%\Jxon.ahk
+Return
+
 +Escape::
-    ; If (SSRs = 0) {
-    ;     MsgBox, 0, , UUR terminated.
-    ; } Else {
-    ;     MsgBox, 0, , % UUR terminated. Results:`n`n Kitasan Total: SSRs
-    ; }
     MsgBox, 0, , UUR terminated.
     ExitApp
