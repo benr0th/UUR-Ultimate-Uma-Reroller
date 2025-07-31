@@ -3,6 +3,7 @@ Lang/
 dev/
 *.pmc
 *.dll
+!sqlite3.dll
 *.exe
 *.chm
 *.ini
