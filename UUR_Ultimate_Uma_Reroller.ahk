@@ -29,7 +29,7 @@ CoordMode, Pixel, Screen
 
 ; Return
 
-; TODO: Better target SSR detection (unique pixel check?)
+; TODO: Implement unique pixel check for SSRs
 ; TODO: Find alternative to excessive FileIntall usage
 
 NORMAL_TEXT := 0x794016
@@ -41,6 +41,9 @@ SCOUT := 0xd9683e
 KITA_HAIR := 0x45434c
 KITA_CARD_COLOR := 0xfffa69
 
+banners := []
+bannerObjects := []
+
 Intro:
     SysGet, MonitorCount, MonitorCount
     Gui -MinimizeBox -MaximizeBox -SysMenu
@@ -51,7 +54,7 @@ Intro:
     Gui Add, Text, x31 y150 w375 h23 +0x200, Enter the password that will be used for data link (This is not stored anywhere)
     Gui Add, Edit, hWndhEdtValue3 vpass x31 y173 w121 h21
 
-    Gui Add, Text, x31 y210 w375 h23 +0x200, Choose banner to roll on
+    Gui Add, Text, x31 y210 w375 h23 +0x200, Choose character to roll for
     Gui Add, DropDownList, vBannerDropdown x31 y233 w200 +AltSubmit Choose1, Loading...
 
     Gui Add, Text, x31 y270 w400 h23 +0x200, Number of target SSR obtained to save account
@@ -68,6 +71,13 @@ Intro:
 
     Gui, Font, cDefault
     Gui Add, Text, x430 y40 w260, Welcome to UUR (Ultimate Uma Reroller)!`nThis script will infinitely reroll on the chosen banner. `n`n`nThis is the order of operations: `n  - deletes the current account`n - makes a new one`n  - grabs the carats from the gifts and rolls until out`n  - If the target SSR obtained treshold is met:`n    - takes a screenshot of the List view of Support Cards`n    - sets up a Data Link and takes a screenshot of the trainer ID`n    - saves the trainer ID and amount of target SSRs obtained to a text file, then restarts the process`n`n`n`nThe script will start after pressing the OK button. `nPress Shift+Escape to stop the script at any time.
+
+    ; Gui Font, cRed bold
+    ; Gui Add, Text, vBannerWarn x190 y435 w320 +0x200, Banner choice only works for Support Cards currently!
+    ; Gui Add, Text, vBannerWarn2 x230 y450 w320 +0x200, Please choose a different banner.
+    ; Gui Font, cDefault
+    ; GuiControl, Hide, BannerWarn
+    ; GuiControl, Hide, BannerWarn2
 
     ; Get monitors and fill in dropdown
     Loop, %MonitorCount%
@@ -114,8 +124,24 @@ WM_MOUSEMOVE()
     return
 }
 
+; OnBannerChoice:
+;     Gui Submit, NoHide
+
+;     If (BannerDropdown = 1 or BannerDropdown = 2)
+;     {
+;         GuiControl, Disable, OK
+;         GuiControl, Show, BannerWarn
+;         GuiControl, Show, BannerWarn2
+;     } Else
+;     {
+;         GuiControl, Hide, BannerWarn
+;         GuiControl, Hide, BannerWarn2
+;         GuiControl, Enable, OK
+;     }
+;     Return
+
 ButtonOK:
-    Gui Submit
+    Gui Submit, NoHide
     If (pass = "")
     {
         MsgBox, 0, , Please enter a password for Data Link.
@@ -146,7 +172,7 @@ Macro1:
 
     Loop
     {
-        global targetSSR, preLinkDone, onTitleScreen
+        global targetSSR, preLinkDone, onTitleScreen, bannerObjects
         targetSSR := 0
         WinActivate, Umamusume ahk_class UnityWndClass
         Sleep, 333
@@ -766,43 +792,18 @@ Macro1:
             click1 := scaleX(1232)
             click2 := scaleY(877)
             Sleep, 600
-            Loop, % BannerDropdown - 1 ; Clicks next banner as many times as needed to get to desired banner
+            bannerCount := FindMoveBannerAmount()
+            Loop, % bannerCount ; Clicks next banner as many times as needed to get to desired banner
             {
                 Click, %click1%, %click2% Left, 1  ; Move banner
                 Sleep, 600
             }
         }
-        ; x1 := scaleX(533)
-        ; y1 := scaleY(807)
-        ; x2 := scaleX(944)
-        ; y2 := scaleY(954)
-        ; x1 := scaleX(858)
-        ; y1 := scaleY(856)
-        ; x2 := scaleX(881)
-        ; y2 := scaleY(872)
-        x1 := scaleX(816)
-        y1 := scaleY(848)
-        x2 := scaleX(842)
-        y2 := scaleY(915)
-        Loop
-        {
-            ; ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250717230322.png
-            PixelSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, 0x45434c, 0, Fast RGB
-            Sleep, 100
-        }
-        Until ErrorLevel = 0
-        If (ErrorLevel = 0)
-        {
-            Sleep, 500
-            click1 := scaleX(994)
-            click2 := scaleY(1153)
-            Click, %click1%, %click2% Left, 1  ; Make sure we're rolling for Kitasan
-            Sleep, 10
-        }
-        ; x1 := scaleX(374)
-        ; y1 := scaleY(883)
-        ; x2 := scaleX(1108)
-        ; y2 := scaleY(997)
+        Sleep, 500
+        click1 := scaleX(994)
+        click2 := scaleY(1153)
+        Click, %click1%, %click2% Left, 1  ; Click x10 roll
+
         x1 := scaleX(758)
         y1 := scaleY(897)
         x2 := scaleX(866)
@@ -822,28 +823,10 @@ Macro1:
             Click, %click1%, %click2% Left, 1  ; Pray to the RNG Gods
             Sleep, 10
         }
-        /*
 
-        ImageSearch, FoundX, FoundY, %x1%, %y1%, %x2%, %y2%, %A_ScriptDir%\Screenshots\Screen_20250717221102.png
-        Sleep, 100
-        If (ErrorLevel)
-        {
-            click1 := scaleX(1206)
-            click2 := scaleY(1365)
-            Click, %click1%, %click2% Left, 1  ; Click skip until can roll again
-            Sleep, 100
-        }
-        Else
-        {
-            Break
-        }
-        */
+        ; Roll loop beings
         Loop
         {
-            ; x1 := scaleX(368)
-            ; y1 := scaleY(1296)
-            ; x2 := scaleX(1116)
-            ; y2 := scaleY(1414)
             x1 := scaleX(752)
             y1 := scaleY(1309)
             x2 := scaleX(914)
@@ -882,10 +865,6 @@ Macro1:
             click2 := scaleY(1344)
             Click, %click1%, %click2% Left, 1  ; Pray to the RNG Gods
             Sleep, 10
-            ; x1 := scaleX(378)
-            ; y1 := scaleY(882)
-            ; x2 := scaleX(1090)
-            ; y2 := scaleY(1000)
 
             x1 := scaleX(755)
             y1 := scaleY(896)
@@ -907,10 +886,6 @@ Macro1:
             }
             Else
             {
-                ; x1 := scaleX(594)
-                ; y1 := scaleY(837)
-                ; x2 := scaleX(705)
-                ; y2 := scaleY(886)
                 x1 := scaleX(614)
                 y1 := scaleY(843)
                 x2 := scaleX(694)
@@ -944,10 +919,6 @@ Macro1:
             }
         }
         Sleep, 300
-        ; x1 := scaleX(590)
-        ; y1 := scaleY(834)
-        ; x2 := scaleX(870)
-        ; y2 := scaleY(884)
         x1 := scaleX(614)
         y1 := scaleY(843)
         x2 := scaleX(694)
@@ -967,10 +938,7 @@ Macro1:
             Click, %click1%, %click2% Left, 1 ; Click cancel
             Sleep, 10
         }
-        ; x1 := scaleX(376)
-        ; y1 := scaleY(1299)
-        ; x2 := scaleX(1092)
-        ; y2 := scaleY(1406)
+
         x1 := scaleX(752)
         y1 := scaleY(1309)
         x2 := scaleX(914)
@@ -990,10 +958,7 @@ Macro1:
             Click, %click1%, %click2% Left, 1  ; Go back to main screen
             Sleep, 10
         }
-        ; x1 := scaleX(609)
-        ; y1 := scaleY(1322)
-        ; x2 := scaleX(875)
-        ; y2 := scaleY(1435)
+
         x1 := scaleX(691)
         y1 := scaleY(1392)
         x2 := scaleX(785)
@@ -1013,10 +978,7 @@ Macro1:
             Sleep, 10
         }
         Sleep, 1500
-        ; x1 := scaleX(752)
-        ; y1 := scaleY(983)
-        ; x2 := scaleX(1057)
-        ; y2 := scaleY(1064)
+
         x1 := scaleX(1017)
         y1 := scaleY(1024)
         x2 := scaleX(1045)
@@ -1035,10 +997,7 @@ Macro1:
             Click, %click1%, %click2% Left, 1  ; Support cards
             Sleep, 1000
         }
-        ; x1 := scaleX(437)
-        ; y1 := scaleY(1067)
-        ; x2 := scaleX(719)
-        ; y2 := scaleY(1146)
+
         x1 := scaleX(433)
         y1 := scaleY(1114)
         x2 := scaleX(453)
@@ -1057,10 +1016,7 @@ Macro1:
             Click, %click1%, %click2% Left, 1  ; List to see all
             Sleep, 10
         }
-        ; x1 := scaleX(235)
-        ; y1 := scaleY(1182)
-        ; x2 := scaleX(340)
-        ; y2 := scaleY(1248)
+
         x1 := scaleX(249)
         y1 := scaleY(1191)
         x2 := scaleX(327)
@@ -1153,7 +1109,7 @@ GetRollResults(ByRef SSRs, ByRef SRs, ByRef Rs, ByRef targetSSR)
             PixelSearch, FoundX, FoundY, %targetX1%, %targetY1%, %targetX2%, %targetY2%, 0xfffa69, 2, Fast RGB ; Kitasan Black
             If (ErrorLevel = 0)
             {
-                ; MsgBox, 0, , % "found kitasan at " . index
+                ; MsgBox, 0, , % "found target at " . index
                 targetSSR += 1
             }
 
@@ -1370,6 +1326,7 @@ GetScreenshot(x1, y1, x2, y2, name)
 
 GetCurrentBanners()
 {
+    global banners
     banners := GetBannersFromDB()
     FileInstall, fetch_banner.ahk, %A_ScriptDir%\fetch_banner.ahk, 1
     FileInstall, Lib\Jxon.ahk, %A_ScriptDir%\Jxon.ahk, 1
@@ -1384,6 +1341,7 @@ GetCurrentBanners()
 
 GetBannersFromDB()
 {
+    global banners
     FileInstall, sqlite3.dll, %A_ScriptDir%\sqlite3.dll, 1 ; This might get flagged by AV, look for alternatives if possible
     DBFileName := "C:\Users\" . A_UserName . "\AppData\LocalLow\Cygames\Umamusume\master\master.mdb"
     DB := New SQLiteDB
@@ -1392,8 +1350,7 @@ GetBannersFromDB()
         ExitApp
     }
 
-    SQL := "SELECT transition, priority, end_date FROM banner_data;"
-    banners := []
+    SQL := "SELECT transition, priority, start_date, end_date FROM banner_data;"
     Result := ""
     If !DB.GetTable(SQL, Result)
         MsgBox, 16, SQLite Error: GetTable, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
@@ -1402,11 +1359,14 @@ GetBannersFromDB()
         Values := ""
         For Each, Row In Result.Rows
         {
-            dateTimeAHK := RegExReplace(Row[3], "[/: ]", "")
-            EnvSub, datetimeAHK, A_NowUTC, Seconds
-            If (dateTimeAHK > 0 and Row[2] = 9) ; Find the correct banners that are currently running
+            startTime := RegExReplace(Row[3], "[/: ]", "")
+            EnvSub, startTime, A_NowUTC, Seconds
+            endTime := RegExReplace(Row[4], "[/: ]", "")
+            EnvSub, endTime, A_NowUTC, Seconds
+            If (endTime > 0 and startTime <= 0 and Row[2] = 9) ; Find the correct banners that are currently running
             {
-                subSQL := "SELECT card_type FROM gacha_data WHERE id = " . Row[1] . ";" ; Used to sort the banners in the order they appear in game
+                ; subSQL := "SELECT card_id, card_type FROM gacha_exchange WHERE gacha_id = " . Row[1] . ";" ; Used to sort the banners in the order they appear in game
+                subSQL := "SELECT card_type FROM gacha_data WHERE id = " . Row[1] . ";"
                 subResult := ""
                 If !DB.GetTable(subSQL, subResult)
                     MsgBox, 16, SQLite Error: GetTable, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
@@ -1415,6 +1375,7 @@ GetBannersFromDB()
                     subValues := ""
                     For i, subRow in subResult.Rows
                     {
+                        ; banners.Push({"banner_id": Row[1], "card_id": subRow[1], "card_type": subRow[2]})
                         banners.Push({"banner_id": Row[1], "card_type": subRow[1]})
                     }
                 }
@@ -1428,20 +1389,43 @@ GetBannersFromDB()
 AsyncBanner:
     GetCurrentBanners()
     FileRead, banners, banners.txt
+    Sleep, 100
     GuiControl, , BannerDropdown, |
     Loop, Parse, banners, `n, `r
     {
-        GuiControl, , BannerDropdown, %A_LoopField%
+        line := A_LoopField
+        if RegExMatch(line, "^(.*) \(char_id: (\d+), banner_id: (\d+)\)$", match)
+        {
+            name := match1
+            char_id := match2
+            banner_id := match3
+            bannerObjects.Push({name: name, char_id: id, banner_id: banner_id})
+            GuiControl,, BannerDropdown, %name%
+        }
+        ; GuiControl, , BannerDropdown, %A_LoopField%
     }
-    Sleep, 100
     GuiControl, Choose, BannerDropdown, 1
     SetTimer, AsyncBanner, Off
     GuiControl, Enable, OK
+    ; Gosub, OnBannerChoice
     FileDelete, banners.txt
     FileDelete, %A_ScriptDir%\fetch_banner.ahk
     FileDelete, %A_ScriptDir%\Jxon.ahk
     FileDelete, %A_ScriptDir%\sqlite3.dll
 Return
+
+FindMoveBannerAmount()
+{
+    global bannerObjects
+    bannerCount := 0
+    Loop, % BannerDropdown
+    {
+        index := A_Index
+        If (bannerObjects[index].banner_id != bannerObjects[index+1].banner_id) ; Characters are in banner order, increment count on different banner
+            bannerCount += 1
+    }
+    return bannerCount
+}
 
 UnixToUTC(unixTime){
     time:=1970

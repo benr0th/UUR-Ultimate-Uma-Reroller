@@ -18,14 +18,16 @@ if !IsObject(banners[idx])
 for i, char in chars
 {
     If (char.rarity = 3 or char.default_rarity = 3)
-        banners[idx].Push(char.chara_data.name_en)
+        banners[idx].Push({"name": char.chara_data.name_en, "char_id": char.id, "banner_id": data.id})
 }
 For idx, arr in banners
 {
     names := ""
     For i, n in arr
     {
-        names .= (i = arr.Length() ? n : n . ", ")
+        names .= n.name . " (char_id: " . n.char_id . ", banner_id: " . n.banner_id ")"
+        if (i < arr.Length())
+            names .= "`n"
     }
     FileAppend, % names . "`n", %A_ScriptDir%\banners.txt
 }
