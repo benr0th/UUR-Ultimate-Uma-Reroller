@@ -3,7 +3,7 @@
 This is an AHK (AutoHotkey) script that automates the rerolling process for Uma Musume Pretty Derby Steam Global version. Currently, it only supports rolling on the Kitasan Black banner.
 
 ## Disclaimer
-This script is not affiliated with or endorsed by Cygames, Inc. or any of its subsidiaries. Use this script at your own risk. The author is not responsible for any issues that may arise from using this script, including but not limited to account bans or data loss. (Realistically, you won't get banned for using this script as it doesn't modify the game files, but better safe than sorry.)
+This script is not affiliated with or endorsed by Cygames, Inc. or any of its subsidiaries. Use this script at your own risk. The author is not responsible for any issues that may arise from using this script, including but not limited to account bans or data loss.
 
 ## Pre-requisites
 
